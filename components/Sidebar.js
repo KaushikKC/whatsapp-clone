@@ -4,13 +4,46 @@ import styled from 'styled-components';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ChatIcon from '@mui/icons-material/Chat';
 import SearchIcon from '@mui/icons-material/Search';
-
+import * as EmailValidator from "email-validator";
+import { auth,db } from '../firebase';
+import { addDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollection } from "react-firebase-hooks/firestore";
+import Chat from './Chat';
 
 function Sidebar() {
+    const[user] = useAuthState(auth);
+    const userChatRef = query(collection(db,'chats'),where('users','array-contains', user.email)); 
+    const [chatsSnapshot] = useCollection(userChatRef);
+    // console.log(chatsSnapshot?.docs)
+
+const createChat =() => {
+    const input = prompt(
+    "Please enter an email address for the user you wish to chat with"
+    );
+
+    if (!input) return null;
+
+    if(EmailValidator.validate(input) && 
+    !chatAlreadyExists(input) && 
+    input !== user.email) {
+        addDoc(collection(db,'chats'), {
+            users: [user.email, input],
+        });
+    };
+};
+
+    const chatAlreadyExists = (recipientEmail) => 
+        !!chatsSnapshot?.docs.find(
+            (chat) => 
+            chat.data().users.find((user) => user === recipientEmail)?.length > 0
+        );
+
+
   return (
     <container>
         <Header>
-            <UserAvatar />
+            <UserAvatar src={user.photoURL} onClick={() => auth.signOut()} />
 
             <IconContainer>
                 <IconButton>
@@ -29,7 +62,12 @@ function Sidebar() {
             <SearchIcon />
             <SearchInput placeholder='Search in chats' />
         </Search>
-        <SidebarButton>Start a New chat</SidebarButton>
+        <SidebarButton onClick={createChat}>Start a New chat</SidebarButton>
+
+        {chatsSnapshot?.docs.map((chat) => (
+            <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+        ))}
+        
     </container>
   );
 }
