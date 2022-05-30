@@ -15,7 +15,6 @@ function Sidebar() {
     const[user] = useAuthState(auth);
     const userChatRef = query(collection(db,'chats'),where('users','array-contains', user.email)); 
     const [chatsSnapshot] = useCollection(userChatRef);
-    // console.log(chatsSnapshot?.docs)
 
 const createChat =() => {
     const input = prompt(
@@ -41,9 +40,9 @@ const createChat =() => {
 
 
   return (
-    <container>
+    <Container>
         <Header>
-            <UserAvatar src={user.photoURL} onClick={() => auth.signOut()} />
+            <UserAvatar src={ user.photoURL } onClick={() => auth.signOut()} />
 
             <IconContainer>
                 <IconButton>
@@ -68,14 +67,26 @@ const createChat =() => {
             <Chat key={chat.id} id={chat.id} users={chat.data().users} />
         ))}
         
-    </container>
+    </Container>
   );
 }
 
 export default Sidebar
 
-const container = styled.div`
+const Container = styled.div`
+    flex: 0.45;
+    border-right: 1px solid whitesmoke;
+    height: 100vh;
+    min-width: 270px;
+    max-width: 350px;
+    overflow: scroll;
 
+    ::-webkit-scrollbar{
+        display: none;
+    }
+    
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 `;
 
 const Header = styled.div`

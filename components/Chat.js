@@ -18,7 +18,6 @@ function Chat(id,users) {
     };
     const recipient = recipientSnapshot?.docs?.[0]?.data();
     const recipientEmail = getRecipienytEmail(id.users,user);
-    console.log(recipientSnapshot)
   return (
     <Container onClick={enterChat}>
         {recipient ? (
